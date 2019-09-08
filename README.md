@@ -18,10 +18,10 @@ smtp.live.com       StartTLS    587
 
 smtp.office365.com  StartTLS	587
 
-smtp.mail.yahoo.com	SSL         465
+smtp.mail.yahoo.com SSL         465
 
 smtp.aol.com	    StartTLS	587
 
-smtp.att.yahoo.com	SSL         465
+smtp.att.yahoo.com  SSL         465
 ...
 ```
