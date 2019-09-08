@@ -25,3 +25,6 @@ smtp.aol.com	    StartTLS	587
 smtp.att.yahoo.com  SSL         465
 ...
 ```
+
+### Sample Warning
+![Sample Warning](https://i.imgur.com/GJOx5Ab.png)
