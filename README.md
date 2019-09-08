@@ -27,4 +27,4 @@ smtp.att.yahoo.com  SSL         465
 ```
 
 ### Sample Warning
-![Sample Warning](https://i.imgur.com/GJOx5Ab.png)
+![Sample Warning](https://i.gyazo.com/5deebbb4592215879ead984888c3dea5.png)
