@@ -1,3 +1,4 @@
+package Gui;
 import java.awt.event.*; 
 import java.awt.*; 
 import javax.swing.*; 
@@ -16,7 +17,7 @@ public class Kscreen {
 	
 	
 	
-	Kscreen()
+	public Kscreen()
 	{
 		
 		
@@ -34,7 +35,7 @@ public class Kscreen {
 				
 				JPanel p1 = new JPanel();	
 			//BufferedImage myPicture = ImageIO.read(new File("warn_klog.png")); 
-			BufferedImage myPicture = ImageIO.read(new File("warn_klog.png")); 
+			BufferedImage myPicture = ImageIO.read(new File("Gui/warn_klog.png")); 
 			
 			JLabel picLabel = new JLabel(new ImageIcon(myPicture)); 
 			p1.add(picLabel);
@@ -83,7 +84,7 @@ public class Kscreen {
 	
 	
 	
-	public void getInfo(int pid, String pname, String fileloc,int portid)
+	public void setInfo(int pid, String pname, String fileloc,int portid)
 	{
 		this.pid=pid;
 		this.pname=pname;
