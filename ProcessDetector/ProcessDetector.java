@@ -9,10 +9,10 @@ public class ProcessDetector{
     public void execCommand(String command){
         String scan = "";
         int processId;
-        Process nmap;
+        Process cmd;
         try{
-            nmap = Runtime.getRuntime().exec(command);
-            Scanner sc = new Scanner(nmap.getInputStream());
+            cmd = Runtime.getRuntime().exec(command);
+            Scanner sc = new Scanner(cmd.getInputStream());
             while(sc.hasNext()){
                 scan += sc.nextLine() + "\n";
                 String processIdString = scan.substring(scan.lastIndexOf(' ')+1);
@@ -72,5 +72,17 @@ public class ProcessDetector{
             System.out.println(e);
         }
         return "INVALID";
+    }
+
+    public int getProcessId(){
+        return processId;
+    }
+
+    public String getProcessName(){
+        return processName;
+    }
+
+    public String getProcessPath(){
+        return processPath;
     }
 }

@@ -17,9 +17,9 @@ public class Kscreen {
 	
 	
 	
-	public Kscreen()
+	public Kscreen(int id, String name, String path)
 	{
-		
+			setInfo(id, name, path);
 		
 		
 			JFrame f = new JFrame("KeyLogger !");
@@ -84,17 +84,18 @@ public class Kscreen {
 	
 	
 	
-	public void setInfo(int pid, String pname, String fileloc,int portid)
+	public void setInfo(int pid, String pname, String fileloc)
 	{
 		this.pid=pid;
 		this.pname=pname;
 		this.fileloc=fileloc;
-		this.portid =portid;
+		//this.portid =portid;
 	}
 	
 	
 	public String readLabel() {
-		return(pid+" - "+pname+" located at "+fileloc+" is attempting to communicate through port "+portid);
+		//return(pid+" - "+pname+" located at "+fileloc+" is attempting to communicate through port "+portid);
+		return(pid+" - "+pname+" located at "+fileloc+" is attempting to communicate through a email!");
 	}
 	
 
