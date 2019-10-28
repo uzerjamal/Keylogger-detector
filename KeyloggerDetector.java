@@ -2,7 +2,7 @@ import ProcessDetector.*;
 import Gui.*;
 
 public class KeyloggerDetector{
-    public static void main(String[] args){
+    public static void main(String[] a){
         int processId;
         String processName, processPath;
         boolean windowOpened = false;
