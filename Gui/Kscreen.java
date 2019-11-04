@@ -4,26 +4,36 @@ import java.awt.*;
 import javax.swing.*; 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.*;
 import java.io.File;
 import javax.imageio.ImageIO;
 import java.io.IOException;
-public class Kscreen {
+public class Kscreen implements ActionListener{
 
+	private static final int EXIT_ON_CLOSE = 0;
 	int pid;
 	int portid;
 	String pname;
 	String fileloc;
+	String whitelistfile="Whitelist.txt";		//path of the file that stores the whitelisted applications'
 	
 	
-	
+	JButton sc_bt, op_bt, kill_bt, del_bt,white_bt;
 	
 	public Kscreen(int id, String name, String path)
 	{
-			setInfo(id, name, path);
+			//setInfo(id, name, path);
+		
+			this.pid=id;
+			this.pname=name;
+			this.fileloc=path;
+		
+		
+		
 		
 		
 			JFrame f = new JFrame("KeyLogger !");
-			JButton sc_bt, op_bt, kill_bt, del_bt;
+			f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			JPanel p = new JPanel();
 			
 		/*
@@ -58,7 +68,6 @@ public class Kscreen {
 			//C:\\Users\\Home\\Downloads\\Kwarn.png
 			
 			sc_bt = new JButton("Scan the File");
-			
 		    sc_bt.setBackground(Color.GREEN);
 			op_bt = new JButton("Open File Location");
 			op_bt.setBackground(Color.LIGHT_GRAY);
@@ -66,10 +75,18 @@ public class Kscreen {
 			kill_bt.setBackground(Color.RED);
 			del_bt = new JButton("Delete File");
 			del_bt.setBackground(Color.ORANGE);
+			white_bt = new JButton("Whitelist File");
+			white_bt.setBackground(Color.CYAN);
 			p.add(sc_bt);
 			p.add(op_bt);
+			op_bt.addActionListener(this);
 			p.add(kill_bt);
+			kill_bt.addActionListener(this);
 			p.add(del_bt);
+			del_bt.addActionListener(this);
+			p.add(white_bt);
+			white_bt.addActionListener(this);
+			
 			
 			//f.add(warningLabel,"Center");
 			f.add(p,"South");
@@ -81,21 +98,100 @@ public class Kscreen {
 					
 
 		}
-	
-	
-	
-	public void setInfo(int pid, String pname, String fileloc)
+		
+	public String  getFilePathString(String fileloc)
 	{
-		this.pid=pid;
-		this.pname=pname;
-		this.fileloc=fileloc;
-		//this.portid =portid;
+		
+		//String filelocpath="";
+		
+		fileloc.substring(0,fileloc.lastIndexOf("\\") );
+		System.out.println(fileloc.substring(0,fileloc.lastIndexOf("\\") ));
+	
+		return(fileloc.substring(0,fileloc.lastIndexOf("\\") ));
+		
+		
+		
 	}
+		
+		
+		public void actionPerformed(ActionEvent e) {
+			
+			boolean bool=false;
+			
+			String filePath = "explorer "+getFilePathString(fileloc);
+			
+       
+			
+		if(e.getSource()== op_bt)
+		{
+			 try{
+			 
+			 Runtime.getRuntime().exec(filePath);
+			 }
+			 catch(IOException ioe)
+			 {
+				 ioe.printStackTrace(); 
+			 }
+		}
+		
+		if(e.getSource()== del_bt)
+		{
+			try{
+				System.out.println(fileloc);
+				//File file = new File("C:\\Program Files\\HelloWorld.txt"); 
+				File file = new File(fileloc); 
+				bool = file.delete();
+				System.out.println("File deleted: "+bool);
+				
+				
+				
+			}catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			
+		}
+		
+		
+		if(e.getSource()== kill_bt)
+		{
+			try{
+				String killcommand = "taskkill /F /PID " + pid;
+				Runtime.getRuntime().exec(killcommand);
+				//System.out.println("Process Terminated!");
+				//Runtime.getRuntime().exec("taskkill /F /IM <processname>.exe")		using processname
+			}catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		
+		if(e.getSource()== white_bt)
+		{
+			try{
+				
+				BufferedWriter out = new BufferedWriter(new FileWriter(whitelistfile, true)); 
+	            out.write(fileloc); 
+	            out.close();
+				
+			}catch(IOException ex)
+			{
+				System.out.println("exception occoured" + ex); 
+			}
+		}
+		
+		
+		
+    }
+			
+	
+	
+	
 	
 	
 	public String readLabel() {
-		//return(pid+" - "+pname+" located at "+fileloc+" is attempting to communicate through port "+portid);
-		return(pid+" - "+pname+" located at "+fileloc+" is attempting to communicate through a email!");
+		
+		return(pid+" - "+pname+" located at "+fileloc+" is attempting to communicate through an email!");
 	}
 	
 
