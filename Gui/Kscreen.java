@@ -171,7 +171,8 @@ public class Kscreen implements ActionListener{
 			try{
 				
 				BufferedWriter out = new BufferedWriter(new FileWriter(whitelistfile, true)); 
-	            out.write(fileloc); 
+				out.write(fileloc);
+				out.newLine();
 	            out.close();
 				
 			}catch(IOException ex)
