@@ -23,7 +23,7 @@ public class ProcessDetector{
 	
     public ArrayList<ProcessData> scanPorts(){
         String scan = "";
-        Process cmd = execCommand("cmd /c netstat -ano -p tcp |findstr /C:\"443\" /C:\"587\"");
+        Process cmd = execCommand("cmd /c netstat -ano -p tcp |findstr /C:\"465\" /C:\"587\"");
         try{
             Scanner sc = new Scanner(cmd.getInputStream());
             while(sc.hasNext()){
