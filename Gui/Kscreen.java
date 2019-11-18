@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 public class Kscreen implements ActionListener{
 
-	private static final int EXIT_ON_CLOSE = 0;
+	//private static final int EXIT_ON_CLOSE = 0;
 	int pid;
 	int portid;
 	String pname;
@@ -33,14 +33,10 @@ public class Kscreen implements ActionListener{
 		
 		
 			JFrame f = new JFrame("KeyLogger !");
-			f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			//f.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 			JPanel p = new JPanel();
 			
-		/*
-		 * ImageIcon icon = new ImageIcon("warn_klog.png"); Image normalImage =
-		 * icon.getImage(); Icon warningIcon = new ImageIcon(normalImage); JLabel
-		 * warningLabel = new JLabel(warningIcon);
-		 */
+		
 			try {
 				
 				JPanel p1 = new JPanel();	
@@ -65,10 +61,9 @@ public class Kscreen implements ActionListener{
 			
 
 			
-			//C:\\Users\\Home\\Downloads\\Kwarn.png
+		
 			
-			sc_bt = new JButton("Scan the File");
-		    sc_bt.setBackground(Color.GREEN);
+			
 			op_bt = new JButton("Open File Location");
 			op_bt.setBackground(Color.LIGHT_GRAY);
 			kill_bt = new JButton("Kill Process");
@@ -76,8 +71,7 @@ public class Kscreen implements ActionListener{
 			del_bt = new JButton("Delete File");
 			del_bt.setBackground(Color.ORANGE);
 			white_bt = new JButton("Whitelist File");
-			white_bt.setBackground(Color.CYAN);
-			p.add(sc_bt);
+			white_bt.setBackground(Color.GREEN);
 			p.add(op_bt);
 			op_bt.addActionListener(this);
 			p.add(kill_bt);
