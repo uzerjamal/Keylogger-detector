@@ -4,7 +4,7 @@ import smtplib
 text = ''
 file = open('log.txt', 'a')
 user = 'Kbcsumit@gmail.com'
-password = 'SumitUncool07'
+password = 'SumitUncool07' #Kindly store your password in a local .env file. Though it's a dummy account with 2 step auth, it is alaways safer to not give it away so easily.
 
 
 def email(recipient, message):
