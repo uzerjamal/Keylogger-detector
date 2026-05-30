@@ -1,193 +1,156 @@
 package Gui;
-import java.awt.event.*; 
-import java.awt.*; 
-import javax.swing.*; 
-import java.awt.Graphics;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.io.File;
-import javax.imageio.ImageIO;
-import java.io.IOException;
-public class Kscreen implements ActionListener{
 
-	//private static final int EXIT_ON_CLOSE = 0;
-	int pid;
-	int portid;
-	String pname;
-	String fileloc;
-	String whitelistfile="Whitelist.txt";		//path of the file that stores the whitelisted applications'
-	
-	
-	JButton sc_bt, op_bt, kill_bt, del_bt,white_bt;
-	
-	public Kscreen(int id, String name, String path)
-	{
-			//setInfo(id, name, path);
-		
-			this.pid=id;
-			this.pname=name;
-			this.fileloc=path;
-		
-		
-		
-		
-		
-			JFrame f = new JFrame("KeyLogger !");
-			//f.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-			JPanel p = new JPanel();
-			
-		
-			try {
-				
-				JPanel p1 = new JPanel();	
-			//BufferedImage myPicture = ImageIO.read(new File("warn_klog.png")); 
-			BufferedImage myPicture = ImageIO.read(new File("Gui/warn_klog.png")); 
-			
-			JLabel picLabel = new JLabel(new ImageIcon(myPicture)); 
-			p1.add(picLabel);
-			f.add(p1,"North");
-			
-			}catch(IOException e) {
-			}
-			
-			
-			
-			JPanel p2 = new JPanel();
-			JLabel iLabel = new JLabel(readLabel()); 
-			
-			p2.add(iLabel);
-			p2.setBackground(Color.YELLOW) ;
-			f.add(p2,"Center");
-			
+public class Kscreen implements ActionListener {
 
-			
-		
-			
-			
-			op_bt = new JButton("Open File Location");
-			op_bt.setBackground(Color.LIGHT_GRAY);
-			kill_bt = new JButton("Kill Process");
-			kill_bt.setBackground(Color.RED);
-			del_bt = new JButton("Delete File");
-			del_bt.setBackground(Color.ORANGE);
-			white_bt = new JButton("Whitelist File");
-			white_bt.setBackground(Color.GREEN);
-			p.add(op_bt);
-			op_bt.addActionListener(this);
-			p.add(kill_bt);
-			kill_bt.addActionListener(this);
-			p.add(del_bt);
-			del_bt.addActionListener(this);
-			p.add(white_bt);
-			white_bt.addActionListener(this);
-			
-			
-			//f.add(warningLabel,"Center");
-			f.add(p,"South");
-			
-			f.pack(); 
-			
-			f.setVisible(true);
-		
-					
+    private static final String WHITELIST_PATH = "Whitelist.txt";
+    private static final String WARNING_IMAGE_PATH = "Gui/warn_klog.png";
 
-		}
-		
-	public String  getFilePathString(String fileloc)
-	{
-		
-		//String filelocpath="";
-		
-		fileloc.substring(0,fileloc.lastIndexOf("\\") );
-		System.out.println(fileloc.substring(0,fileloc.lastIndexOf("\\") ));
-	
-		return(fileloc.substring(0,fileloc.lastIndexOf("\\") ));
-		
-		
-		
-	}
-		
-		
-		public void actionPerformed(ActionEvent e) {
-			
-			boolean bool=false;
-			
-			String filePath = "explorer "+getFilePathString(fileloc);
-			
-       
-			
-		if(e.getSource()== op_bt)
-		{
-			 try{
-			 
-			 Runtime.getRuntime().exec(filePath);
-			 }
-			 catch(IOException ioe)
-			 {
-				 ioe.printStackTrace(); 
-			 }
-		}
-		
-		if(e.getSource()== del_bt)
-		{
-			try{
-				System.out.println(fileloc);
-				//File file = new File("C:\\Program Files\\HelloWorld.txt"); 
-				File file = new File(fileloc); 
-				bool = file.delete();
-				System.out.println("File deleted: "+bool);
-				
-				
-				
-			}catch(Exception ex)
-			{
-				ex.printStackTrace();
-			}
-			
-		}
-		
-		
-		if(e.getSource()== kill_bt)
-		{
-			try{
-				String killcommand = "taskkill /F /PID " + pid;
-				Runtime.getRuntime().exec(killcommand);
-				//System.out.println("Process Terminated!");
-				//Runtime.getRuntime().exec("taskkill /F /IM <processname>.exe")		using processname
-			}catch(Exception ex)
-			{
-				ex.printStackTrace();
-			}
-		}
-		
-		if(e.getSource()== white_bt)
-		{
-			try{
-				
-				BufferedWriter out = new BufferedWriter(new FileWriter(whitelistfile, true)); 
-				out.write(fileloc);
-				out.newLine();
-	            out.close();
-				
-			}catch(IOException ex)
-			{
-				System.out.println("exception occoured" + ex); 
-			}
-		}
-		
-		
-		
+    private final int pid;
+    private final String processName;
+    private final String filePath;
+    private JFrame frame;
+
+    private JButton openLocationButton;
+    private JButton killButton;
+    private JButton deleteButton;
+    private JButton whitelistButton;
+
+    public Kscreen(int pid, String processName, String filePath) {
+        this.pid = pid;
+        this.processName = processName;
+        this.filePath = filePath;
+        buildAndShow();
     }
-			
-	
-	
-	
-	
-	
-	public String readLabel() {
-		
-		return(pid+" - "+pname+" located at "+fileloc+" is attempting to communicate through an email!");
-	}
-	
 
+    private void buildAndShow() {
+        frame = new JFrame("Keylogger Detector — Suspicious Process");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // Warning image
+        try {
+            BufferedImage img = ImageIO.read(new File(WARNING_IMAGE_PATH));
+            JPanel imgPanel = new JPanel();
+            imgPanel.add(new JLabel(new ImageIcon(img)));
+            frame.add(imgPanel, BorderLayout.NORTH);
+        } catch (IOException e) {
+            // Image not critical — continue without it
+        }
+
+        // Info label
+        JPanel infoPanel = new JPanel();
+        infoPanel.setBackground(Color.YELLOW);
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        JLabel infoLabel = new JLabel(buildInfoText());
+        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD));
+        infoPanel.add(infoLabel);
+        frame.add(infoPanel, BorderLayout.CENTER);
+
+        // Action buttons
+        openLocationButton = new JButton("Open File Location");
+        openLocationButton.setBackground(Color.LIGHT_GRAY);
+
+        killButton = new JButton("Kill Process");
+        killButton.setBackground(new Color(220, 80, 80));
+        killButton.setForeground(Color.WHITE);
+
+        deleteButton = new JButton("Delete File");
+        deleteButton.setBackground(new Color(230, 140, 40));
+        deleteButton.setForeground(Color.WHITE);
+
+        whitelistButton = new JButton("Whitelist File");
+        whitelistButton.setBackground(new Color(60, 160, 60));
+        whitelistButton.setForeground(Color.WHITE);
+
+        for (JButton btn : new JButton[]{openLocationButton, killButton, deleteButton, whitelistButton}) {
+            btn.addActionListener(this);
+            btn.setFocusPainted(false);
+        }
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
+        buttonPanel.add(openLocationButton);
+        buttonPanel.add(killButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(whitelistButton);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setAlwaysOnTop(true);
+        frame.setVisible(true);
+    }
+
+    private String buildInfoText() {
+        return "<html><b>PID " + pid + "</b> &mdash; <b>" + processName
+                + "</b><br>Location: " + filePath
+                + "<br>This process is communicating on an email or FTP port.</html>";
+    }
+
+    private String parentDirectory(String path) {
+        int last = path.lastIndexOf('\\');
+        return last > 0 ? path.substring(0, last) : path;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+
+        if (src == openLocationButton) {
+            try {
+                Runtime.getRuntime().exec(new String[]{"explorer", parentDirectory(filePath)});
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame, "Could not open file location:\n" + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } else if (src == killButton) {
+            int confirm = JOptionPane.showConfirmDialog(frame,
+                    "Kill process " + processName + " (PID " + pid + ")?",
+                    "Confirm Kill", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    Runtime.getRuntime().exec(new String[]{"taskkill", "/F", "/PID", String.valueOf(pid)});
+                    JOptionPane.showMessageDialog(frame, "Process killed.", "Done", JOptionPane.INFORMATION_MESSAGE);
+                    frame.dispose();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(frame, "Could not kill process:\n" + ex.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+        } else if (src == deleteButton) {
+            int confirm = JOptionPane.showConfirmDialog(frame,
+                    "Permanently delete:\n" + filePath + "\n\nThis cannot be undone.",
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_OPTION) {
+                File file = new File(filePath);
+                if (file.delete()) {
+                    JOptionPane.showMessageDialog(frame, "File deleted.", "Done", JOptionPane.INFORMATION_MESSAGE);
+                    frame.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Could not delete file. It may be in use or require elevated permissions.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+        } else if (src == whitelistButton) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(WHITELIST_PATH, true))) {
+                writer.write(filePath);
+                writer.newLine();
+                JOptionPane.showMessageDialog(frame, "Added to whitelist:\n" + filePath,
+                        "Whitelisted", JOptionPane.INFORMATION_MESSAGE);
+                frame.dispose();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame, "Could not update whitelist:\n" + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 }

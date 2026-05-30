@@ -1,96 +1,98 @@
 package ProcessDetector;
+
 import java.io.IOException;
-import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Scanner;
 
-public class ProcessDetector{
-    ArrayList<ProcessData> data = new ArrayList<ProcessData>();
-    int processId;
-    String processName;
-    String processPath;
-	
-	private Process execCommand(String command){
-		Process process;
-		try{
-            process = Runtime.getRuntime().exec(command);
-            return process;
-		}
-		catch(Exception e){
-            System.out.println(e);
-            return null;
-		}
-	}
-	
-    public ArrayList<ProcessData> scanPorts(){
-        String scan = "";
-        Process cmd = execCommand("cmd /c netstat -ano -p tcp |findstr /C:\"465\" /C:\"587\" /C:\"21\"");
-        try{
-            Scanner sc = new Scanner(cmd.getInputStream());
-            while(sc.hasNext()){
-                scan = sc.nextLine();
-                processId = Integer.parseInt(scan.substring(scan.lastIndexOf(' ')+1));
-                processName = processName(processId);
-                processPath = processPath(processId);
-                if(!processPath.equals("INVALID") && !pathExists(processPath)){
-                    data.add(new ProcessData(processId, processName, processPath));
+public class ProcessDetector {
+
+    // Accumulates detected processes across scans so we don't re-warn about the same path.
+    private final ArrayList<ProcessData> data = new ArrayList<>();
+
+    public ArrayList<ProcessData> scanPorts() {
+        // Match port numbers precisely: ":PORT " catches the port boundary and avoids
+        // false positives (e.g., ":21 " won't match port 210 or 2100).
+        String netstatCmd = "netstat -ano -p tcp | findstr /C:\":465 \" /C:\":587 \" /C:\":21 \"";
+        Process cmd = exec(netstatCmd);
+        if (cmd == null) return data;
+
+        try (Scanner sc = new Scanner(cmd.getInputStream())) {
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine().trim();
+                if (line.isEmpty()) continue;
+
+                String[] parts = line.split("\\s+");
+                if (parts.length < 5) continue;
+
+                int pid;
+                try {
+                    pid = Integer.parseInt(parts[parts.length - 1]);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+
+                String name = resolveProcessName(pid);
+                String path = resolveProcessPath(pid);
+
+                if (!path.equals("INVALID") && !pathAlreadyTracked(path)) {
+                    data.add(new ProcessData(pid, name, path));
                 }
             }
-            sc.close();
+        } catch (Exception e) {
+            System.out.println("[ERROR] scanPorts: " + e.getMessage());
         }
-        catch(Exception e){
-            System.out.println(e);
-        }
-        return this.data;
+        return data;
     }
 
-    String processName(int id){
-        int line = 0;
-        String processName;
-		Process cmd = execCommand("cmd /c tasklist /FI \"PID eq " + id + "\"");
-        try{
-            Scanner sc = new Scanner(cmd.getInputStream());
-            while(sc.hasNext()){
-                if(line == 3){
-                    processName = sc.nextLine();
-                    processName = processName.substring(0, processName.indexOf(' '));
-                    return processName;
+    private String resolveProcessName(int pid) {
+        Process cmd = exec("tasklist /FI \"PID eq " + pid + "\" /NH /FO CSV");
+        if (cmd == null) return "UNKNOWN";
+
+        try (Scanner sc = new Scanner(cmd.getInputStream())) {
+            if (sc.hasNextLine()) {
+                String line = sc.nextLine().trim();
+                // CSV format: "process.exe","PID","Session","#","Mem"
+                if (line.startsWith("\"")) {
+                    return line.substring(1, line.indexOf('"', 1));
                 }
-                sc.nextLine();
-                line++;
             }
+        } catch (Exception e) {
+            System.out.println("[ERROR] resolveProcessName: " + e.getMessage());
         }
-        catch(Exception e){
-            System.out.println(e);
+        return "UNKNOWN";
+    }
+
+    private String resolveProcessPath(int pid) {
+        Process cmd = exec("wmic process where \"ProcessID=" + pid + "\" get ExecutablePath /VALUE");
+        if (cmd == null) return "INVALID";
+
+        try (Scanner sc = new Scanner(cmd.getInputStream())) {
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine().trim();
+                if (line.startsWith("ExecutablePath=")) {
+                    String path = line.substring("ExecutablePath=".length()).trim();
+                    return path.isEmpty() ? "INVALID" : path;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[ERROR] resolveProcessPath: " + e.getMessage());
         }
         return "INVALID";
     }
 
-    String processPath(int id){
-        int line = 0;
-        String processPath;
-		Process cmd = execCommand("cmd /c wmic process where \"ProcessID=" + id + "\" get ExecutablePath");
-        try{
-            Scanner sc = new Scanner(cmd.getInputStream());
-            while(sc.hasNext()){
-                if(line == 2){
-                    processPath = sc.nextLine();
-                    return processPath;
-                }
-                sc.nextLine();
-                line++;
-            }
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
-        return "INVALID";
-    }
-
-    Boolean pathExists(String path){
-        for(int i=0; i<data.size(); i++){
-            if(data.get(i).processPath.equals(path))
-                return true;
+    private boolean pathAlreadyTracked(String path) {
+        for (ProcessData entry : data) {
+            if (entry.processPath.equalsIgnoreCase(path)) return true;
         }
         return false;
+    }
+
+    private Process exec(String command) {
+        try {
+            return Runtime.getRuntime().exec(new String[]{"cmd", "/c", command});
+        } catch (IOException e) {
+            System.out.println("[ERROR] exec failed: " + e.getMessage());
+            return null;
+        }
     }
 }
