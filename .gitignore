@@ -1,0 +1,21 @@
+# Compiled Java class files
+*.class
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Credentials — never commit these
+.env
+Keylogger/.env
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs (the committed empty files are intentional stubs)
+# log.txt
